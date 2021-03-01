@@ -1,0 +1,8 @@
+creds
+config.json
+settings.yaml
+*.db
+*.log
+.vscode
+__pycache__
+test.py
