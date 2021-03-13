@@ -106,7 +106,7 @@ class TwitterBot(Bot):
             #Now, we set the posted value to True, since we have posted the image.
             with self.connection:
                 self.logger.info("Updating database...")
-                self.cursor.execute("UPDATE media SET POSTED=TRUE WHERE ID=:ID",
+                self.cursor.execute("UPDATE '{}' SET POSTED=TRUE WHERE ID=:ID".format(self.name),
                 {"ID":media.id})
                 self.logger.info("Database Updated!")
         

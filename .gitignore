@@ -6,3 +6,5 @@ settings.yaml
 .vscode
 __pycache__
 test.py
+.empty
+.pylintrc

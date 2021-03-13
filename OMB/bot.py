@@ -2,7 +2,7 @@ import sqlite3
 
 import logging
 
-import os
+import re
 
 #This class is used to store data associated with a piece of media.
 class Media:
@@ -36,10 +36,14 @@ class Bot:
                 import json
                 
                 self.__dict__.update(json.load(jsonfile))
-        
+
+        #We use the bot name as the name for our SQL table, this allows us to house multiple bots in the same databse file.
+        #We have to  make sure we sanitize th name of the bot in order to prevent SQL inquection attacks.
+        if re.search("[\";\+=()\']", self.name) is not None:
+            raise ValueError("The characters [\";\+=()\'] are not allowed in bot names, as they leave you vulnerable to SQL injection attacks.")
         #Set up the bot's logger
 
-        #Create a loger with the bot's name, and set the level to INFO.
+        #Create a logger with the bot's name, and set the level to INFO.
         self.logger = logging.getLogger(self.name)
         self.logger.setLevel(logging.INFO)
 
@@ -85,14 +89,14 @@ class Bot:
         self.logger.info("Updating database...")
 
         #Create our database table if it doesn't exist.
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS media (
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS '{}' (
         ID text PRIMARY KEY,
         NAME text NOT NULL,
         LOCATION text NOT NULL,
-        POSTED BOOLEAN NOT NULL);""",)
+        POSTED BOOLEAN NOT NULL);""".format(self.name))
        
         #Query a list of IDs from the database.
-        self.cursor.execute("SELECT ID FROM media")
+        self.cursor.execute("SELECT ID FROM '{}'".format(self.name))
 
         #Get the result of the query.
         db = [row[0] for row in self.cursor.fetchall()]
@@ -118,7 +122,7 @@ class Bot:
                         
                             #Make sure that the correct filename is reflected in our database.
                             
-                            self.cursor.execute("SELECT NAME FROM media WHERE ID=:ID",
+                            self.cursor.execute("SELECT NAME FROM '{}' WHERE ID=:ID".format(self.name),
                             {"ID":file['id']})
 
                             #The above query should only return one result, so we canuse fetchone.
@@ -126,7 +130,7 @@ class Bot:
 
                             #If the name has been changed, update our database.
                             if file['title'] != name:
-                                self.cursor.execute("UPDATE media SET NAME=:NAME WHERE ID=:ID",
+                                self.cursor.execute("UPDATE '{}' SET NAME=:NAME WHERE ID=:ID".format(self.name),
                                 {"NAME":file['title'],"ID":file['id']})
                                 self.logger.info("RENAMED: {} TO {}".format(name, file['title']))
                     
@@ -137,7 +141,7 @@ class Bot:
                         #If the file DOES NOT exist in our database, update the database with information for the new file.
                         else:
 
-                            self.cursor.execute("INSERT INTO media VALUES (:ID, :NAME, 'DRIVE', 'POSTED'=False)",
+                            self.cursor.execute("INSERT INTO '{}' VALUES (:ID, :NAME, 'DRIVE', 'POSTED'=False)".format(self.name),
                             {"ID":file['id'], "NAME":file['title']})
 
                             #Output some useful information for logging purposes.
@@ -145,6 +149,8 @@ class Bot:
                             
             #If we provide local folders, scan them for changes.
             if self.__dict__.get("local_folders") is not None:
+
+                import os
 
                 for folder in self.local_folders:
 
@@ -163,7 +169,7 @@ class Bot:
 
                             #If the file is not in our database, we add it to the database
                             #We use the file path as the ID for local files as the file path must be unique.
-                            self.cursor.execute("INSERT INTO media VALUES (:ID, :NAME, 'LOCAL', 'POSTED'=False)",
+                            self.cursor.execute("INSERT INTO '{}' VALUES (:ID, :NAME, 'LOCAL', 'POSTED'=False)".format(self.name),
                             {"ID":id, "NAME":file})
 
                             self.logger.info("ADDED: {} ({})".format(file, id))
@@ -173,12 +179,12 @@ class Bot:
             for file in db:
 
                 #Grab the name of the file we are about to delete, we want this for logging purposes.
-                self.cursor.execute("SELECT NAME FROM media WHERE ID=:ID",
+                self.cursor.execute("SELECT NAME FROM '{}' WHERE ID=:ID".format(self.name),
                 {"ID":file})
                 
                 name = self.cursor.fetchone()
 
-                self.cursor.execute("DELETE FROM media WHERE ID=:ID",
+                self.cursor.execute("DELETE FROM '{}' WHERE ID=:ID".format(self.name),
                 {"ID":file})
             
                 self.logger.info("DELETED: {} ({})".format(name, file))
@@ -191,7 +197,7 @@ class Bot:
         #Set the posted on all entries to FALSE
             with self.connection:
                 self.logger.info("Restting database...")
-                self.cursor.execute("UPDATE media SET POSTED=FALSE")
+                self.cursor.execute("UPDATE '{}' SET POSTED=FALSE".format(self.name))
                 self.logger.info("Database Reset!")
 
     #This function downloads an image from Google Drive and returns a BytesIO object whith some special fields added.
@@ -233,12 +239,12 @@ class Bot:
 
         #If we don't care about repeats, then just grab an entry.
         if no_repeat == False:
-             self.cursor.execute("SELECT * FROM media")
+             self.cursor.execute("SELECT * FROM '{}'".format(self.name))
              db = self.cursor.fetchall()
 
         else:
             #Grab a list of files that haven't been posted from the database.
-            self.cursor.execute("SELECT * FROM media WHERE POSTED=FALSE")
+            self.cursor.execute("SELECT * FROM '{}' WHERE POSTED=FALSE".format(self.name))
             db = self.cursor.fetchall()
         
             #If all the files have been posted, reset the database.
@@ -248,7 +254,7 @@ class Bot:
                 self.resetdb()
                 
                 #Get an array of all members of the database.
-                self.cursor.execute("SELECT * FROM media WHERE POSTED=FALSE")
+                self.cursor.execute("SELECT * FROM '{}' WHERE POSTED=FALSE".format(self.name))
                 db = self.cursor.fetchall()
                 self.logger.info("Selecting media from database...")
 
