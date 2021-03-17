@@ -1,5 +1,5 @@
 #Import our bot baseclass.
-from OMB.bot import Bot
+from bot import Bot
 
 import json
 

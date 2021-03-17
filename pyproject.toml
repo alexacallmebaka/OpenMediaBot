@@ -1,0 +1,13 @@
+[project]
+name = "OpenMediaBot"
+version = "1.1.0"
+description = "A library for creating media bots."
+readme = "README.md"
+requires-python = ">=3.7"
+license = "LICENSE"
+
+
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
