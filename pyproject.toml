@@ -2,9 +2,18 @@
 name = "OpenMediaBot"
 version = "1.1.0"
 description = "A library for creating media bots."
-readme = "README.md"
+readme = {file = "README.md"}
 requires-python = ">=3.7"
-license = "LICENSE"
+license = {file = "LICENSE"}
+keywords = ["twitter bot", "twitter", "bot", "media bot", "media"]
+author = [{name = "alexacallmebaka"}]
+maintainer = [{name = "alexacallmebaka"}]
+classifiers = ["Development Status :: 5 - Production/Stable"]
+dependencies = ["pydrive2>=1.6.2", 
+"twython>=3.8.2", 
+"simplejson>=3.17.2", 
+"pillow>=8.0.0"]
+urls = { homepage = "https://github.com/alexacallmebaka/OpenMediaBot" }
 
 
 
