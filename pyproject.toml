@@ -13,7 +13,7 @@ dependencies = ["pydrive2>=1.6.2",
 "twython>=3.8.2", 
 "simplejson>=3.17.2", 
 "pillow>=8.0.0"]
-urls = { homepage = "https://github.com/alexacallmebaka/OpenMediaBot" }
+urls = {homepage = "https://github.com/alexacallmebaka/OpenMediaBot"}
 
 
 
