@@ -20,7 +20,7 @@ class Bot:
     def __init__(self, configfile = None,  **kwargs):
 
         #These are the default values for our Bot.
-        defaults = {"name":"OpenMediaBot","db":"media.db"}
+        defaults = {"name":"OpenMediaBot","db":"media.db","gdrive_settings":"settings.yaml"}
         
         #Update the attributes defaults dictionary with any kwargs provided by the user.
         #Since a dictionary does not allow duplicate keys, kwargs provided by the user that were previously set in the default dict will override thier default values.
@@ -75,7 +75,7 @@ class Bot:
             from pydrive2.auth import GoogleAuth
             from pydrive2.drive import GoogleDrive
 
-            self.drive = GoogleDrive(GoogleAuth())
+            self.drive = GoogleDrive(GoogleAuth(settings_file=self.gdrive_settings))
 
         #Connect to our SQLite DB.
         self.connection = sqlite3.connect(self.db)
