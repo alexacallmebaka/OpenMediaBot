@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as readme:
 
 setuptools.setup(
     name="OpenMediaBot",
-    version="1.1.2",
+    version="1.1.3",
     author="alexacallmebaka",
     license="Apache License 2.0",
     description="A library for creating media bots.",
